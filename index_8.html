@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shafi — Senior Product Designer</title>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --black: #0a0a0a; --white: #f5f4f0; --border: rgba(10,10,10,0.1); --font: 'Google Sans', sans-serif; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--white); color: var(--black); overflow-x: hidden; cursor: none; }
+
+    .cursor { width: 10px; height: 10px; background: var(--black); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 99999; transform: translate(-50%,-50%); transition: width .2s, height .2s, background .2s; }
+    .cursor.grow { width: 32px; height: 32px; background: transparent; border: 1.5px solid var(--black); }
+
+    #loader { position: fixed; inset: 0; z-index: 9999; background: var(--white); pointer-events: none; }
+    #loader-counter { position: absolute; bottom: 44px; left: 52px; font-family: var(--font); font-size: clamp(72px,11vw,130px); font-weight: 400; color: var(--black); line-height: 1; letter-spacing: -4px; font-variant-numeric: tabular-nums; }
+    #loader-line { position: absolute; bottom: 0; left: 0; height: 1.5px; width: 0%; background: var(--black); }
+    #loader.done { animation: loaderFade .6s cubic-bezier(.4,0,.2,1) forwards; }
+    @keyframes loaderFade { to { opacity:0; visibility:hidden; } }
+
+    #site { opacity: 0; transition: opacity .6s ease .1s; }
+    #site.visible { opacity: 1; }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; padding: 24px 36px; }
+    .nav-logo { display: flex; flex-direction: column; text-decoration: none; color: var(--black); justify-self: start; }
+    .nav-logo-name { font-size: 13px; font-weight: 400; letter-spacing: -0.01em; line-height: 1.3; }
+    .nav-logo-title { font-size: 11px; font-weight: 400; opacity: 0.4; margin-top: 1px; }
+    .nav-pill { display: flex; align-items: center; background: rgba(245,244,240,.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 0.5px solid rgba(10,10,10,.12); border-radius: 100px; padding: 5px; gap: 2px; justify-self: center; }
+    .nav-pill-link { font-size: 12.5px; font-weight: 400; color: var(--black); text-decoration: none; opacity: .45; padding: 7px 16px; border-radius: 100px; transition: opacity .2s, background .2s; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+    .nav-pill-link sup { font-size: 8px; opacity: .7; vertical-align: super; }
+    .nav-pill-link:hover { opacity: 1; background: rgba(10,10,10,.06); }
+    .nav-pill-link.active { background: var(--white); opacity: 1; border: 0.5px solid rgba(10,10,10,.1); box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .nav-cta-wrap { display: flex; align-items: center; justify-self: end; }
+    .nav-cta { font-size: 13px; font-weight: 400; color: var(--black); text-decoration: none; display: flex; align-items: center; gap: 8px; opacity: .7; transition: opacity .2s; }
+    .nav-cta:hover { opacity: 1; }
+    .nav-cta-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; flex-shrink: 0; animation: pulse 2.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    #hero { height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; }
+    #heroText { display: block; font-weight: 500; color: var(--black); letter-spacing: -0.04em; line-height: 1; white-space: nowrap; margin-bottom: -0.08em; padding-left: 0; font-size: 10px; }
+    .hero-scroll-hint { position: absolute; bottom: 36px; right: 48px; font-size: 10.5px; font-weight: 400; letter-spacing: .12em; text-transform: uppercase; color: var(--black); opacity: .25; writing-mode: vertical-rl; }
+
+    .section-label { font-size: 10.5px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase; color: var(--black); opacity: .3; margin-bottom: 48px; }
+
+    #work { padding: 80px 48px 0; }
+    .work-header { display: flex; justify-content: space-between; align-items: baseline; border-top: 0.5px solid var(--border); padding-top: 32px; margin-bottom: 48px; }
+    .work-header-label,.work-header-count { font-size: 10.5px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase; opacity: .3; }
+    .project-list { list-style: none; }
+    .project-item { display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 24px; padding: 26px 0; border-bottom: 0.5px solid var(--border); text-decoration: none; color: var(--black); position: relative; overflow: hidden; }
+    .project-item::before { content: ''; position: absolute; inset: 0; background: var(--black); transform: scaleX(0); transform-origin: left; transition: transform .4s cubic-bezier(.22,1,.36,1); z-index: 0; }
+    .project-item:hover::before { transform: scaleX(1); }
+    .project-num { font-size: 11px; font-weight: 400; opacity: .3; font-variant-numeric: tabular-nums; letter-spacing: .05em; position: relative; z-index: 1; transition: color .3s, opacity .3s; }
+    .project-title { font-size: clamp(15px,2vw,24px); font-weight: 400; letter-spacing: -.02em; position: relative; z-index: 1; transition: color .3s; }
+    .project-meta { display: flex; align-items: center; gap: 20px; position: relative; z-index: 1; }
+    .project-tags { font-size: 11px; font-weight: 400; opacity: .35; letter-spacing: .06em; text-transform: uppercase; text-align: right; transition: color .3s, opacity .3s; }
+    .project-arrow { font-size: 15px; opacity: .25; transition: color .3s, opacity .3s, transform .3s; }
+    .project-item:hover .project-num,.project-item:hover .project-title,.project-item:hover .project-tags,.project-item:hover .project-arrow { color: var(--white); opacity: 1; }
+    .project-item:hover .project-arrow { transform: translate(3px,-3px); }
+
+    .project-thumb { position: fixed; width: 260px; height: 185px; object-fit: cover; border-radius: 4px; pointer-events: none; opacity: 0; z-index: 50; transition: opacity .25s ease; box-shadow: 0 20px 60px rgba(0,0,0,.18); }
+
+    .marquee-section { padding: 64px 0; overflow: hidden; border-top: 0.5px solid var(--border); margin-top: 80px; }
+    .marquee-track { display: flex; gap: 40px; white-space: nowrap; animation: marquee 22s linear infinite; }
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .marquee-item { font-size: clamp(24px,3.2vw,42px); font-weight: 400; font-style: italic; opacity: .08; letter-spacing: -.02em; flex-shrink: 0; }
+
+    #info { padding: 120px 48px; border-top: 0.5px solid var(--border); }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+    .info-intro { font-size: clamp(20px,2.5vw,32px); font-weight: 400; line-height: 1.3; letter-spacing: -.02em; margin-bottom: 36px; }
+    .info-intro em { font-style: italic; opacity: .4; }
+    .info-body { font-size: 14px; font-weight: 400; opacity: .55; line-height: 1.8; }
+    .info-body p+p { margin-top: 20px; }
+    .info-services { margin-top: 56px; }
+    .service-item { padding: 22px 0; border-top: 0.5px solid var(--border); }
+    .service-item:last-child { border-bottom: 0.5px solid var(--border); }
+    .service-label { font-size: 10.5px; font-weight: 400; letter-spacing: .1em; text-transform: uppercase; opacity: .3; margin-bottom: 6px; }
+    .service-title { font-size: 17px; font-weight: 400; letter-spacing: -.015em; }
+    .career-item { display: flex; justify-content: space-between; align-items: baseline; padding: 20px 0; border-bottom: 0.5px solid var(--border); }
+    .career-item:first-child { border-top: 0.5px solid var(--border); }
+    .career-role { font-size: 14px; font-weight: 500; letter-spacing: -.01em; }
+    .career-company { font-size: 12px; font-weight: 400; opacity: .4; margin-top: 3px; }
+    .career-year { font-size: 11.5px; font-weight: 400; opacity: .3; font-variant-numeric: tabular-nums; }
+
+    #writing { padding: 120px 48px; border-top: 0.5px solid var(--border); }
+    .writing-list { list-style: none; }
+    .writing-item { display: flex; justify-content: space-between; align-items: baseline; padding: 22px 0; border-bottom: 0.5px solid var(--border); text-decoration: none; color: var(--black); transition: opacity .2s; }
+    .writing-item:first-child { border-top: 0.5px solid var(--border); }
+    .writing-item:hover { opacity: .45; }
+    .writing-title { font-size: clamp(14px,1.6vw,20px); font-weight: 400; letter-spacing: -.015em; }
+    .writing-meta { font-size: 11px; font-weight: 400; opacity: .3; letter-spacing: .08em; text-transform: uppercase; }
+
+    #contact { padding: 120px 48px 80px; border-top: 0.5px solid var(--border); }
+    .contact-headline { font-size: clamp(36px,6vw,88px); font-weight: 400; letter-spacing: -.04em; line-height: 1.02; margin-bottom: 52px; max-width: 800px; }
+    .contact-headline em { font-style: italic; opacity: .3; }
+    .contact-links { display: flex; gap: 36px; flex-wrap: wrap; }
+    .contact-link { font-size: 14px; font-weight: 400; color: var(--black); text-decoration: none; border-bottom: 1px solid rgba(10,10,10,.25); padding-bottom: 2px; transition: opacity .2s, border-color .2s; opacity: .6; }
+    .contact-link:hover { opacity: 1; border-color: var(--black); }
+
+    footer { border-top: 0.5px solid var(--border); padding: 24px 48px; display: flex; justify-content: space-between; align-items: center; }
+    .footer-copy { font-size: 11.5px; font-weight: 400; opacity: .25; }
+    .footer-back { font-size: 11.5px; font-weight: 400; opacity: .35; text-decoration: none; color: var(--black); transition: opacity .2s; }
+    .footer-back:hover { opacity: .7; }
+
+    .reveal { opacity: 0; }
+    .reveal.in { animation: fadeIn .9s ease forwards; }
+    @keyframes fadeIn { to { opacity:1; } }
+    /* heroText is pre-sized invisibly, then fades in */
+    #heroText { opacity: 0; transition: opacity 0.9s ease; }
+    #heroText.sized { opacity: 0; }
+    #heroText.visible { opacity: 1; }
+    .sr { opacity: 0; transform: translateY(22px); transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); }
+    .sr.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 900px) {
+      nav { padding: 16px 20px; grid-template-columns: 1fr auto; }
+      .nav-cta-wrap { display: none; }
+      #work,#info,#writing,#contact { padding-left: 24px; padding-right: 24px; }
+      .info-grid { grid-template-columns: 1fr; gap: 48px; }
+      footer { padding: 20px 24px; }
+      #loader-counter { left: 24px; }
+      .project-tags { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<img class="project-thumb" id="projectThumb" src="" alt="" />
+
+<div id="loader">
+  <div id="loader-counter">000</div>
+  <div id="loader-line"></div>
+</div>
+
+<div id="site">
+
+  <nav>
+    <a class="nav-logo" href="index.html">
+      <span class="nav-logo-name">Mohamed Abdelshafi</span>
+      <span class="nav-logo-title">Senior Product Designer</span>
+    </a>
+    <div class="nav-pill">
+      <a class="nav-pill-link active" href="#work">Work<sup>1</sup></a>
+      <a class="nav-pill-link" href="#info">Info<sup>2</sup></a>
+      <a class="nav-pill-link" href="#writing">Writing<sup>3</sup></a>
+    </div>
+    <div class="nav-cta-wrap">
+      <a class="nav-cta" href="mailto:hello@shafi.work">
+        <span class="nav-cta-dot"></span>
+        Get in touch
+      </a>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <span id="heroText">@Shafi©</span>
+    <span class="hero-scroll-hint">Scroll</span>
+  </section>
+
+  <section id="work">
+    <div class="work-header sr">
+      <span class="work-header-label">Selected Projects</span>
+      <span class="work-header-count">08</span>
+    </div>
+    <ul class="project-list">
+      <li><a class="project-item sr" href="case-study.html?id=quotations" data-thumb="https://framerusercontent.com/images/6LSnDfp4qLfKIi5HbZqWXHPRH4.png"><span class="project-num">01</span><span class="project-title">Quotations Tool — Silkhaus</span><span class="project-meta"><span class="project-tags">Research / Design / Prototype</span><span class="project-arrow">↗</span></span></a></li>
+      <li><a class="project-item sr" href="case-study.html?id=deriv" data-thumb="https://framerusercontent.com/images/TscjBO5StqNtfzaOPvlBhZpn7bo.png" style="transition-delay:.04s"><span class="project-num">02</span><span class="project-title">Deriv Wallets</span><span class="project-meta"><span class="project-tags">Product Design / UI / UX</span><span class="project-arrow">↗</span></span></a></li>
+      <li><a class="project-item sr" href="case-study.html?id=chatbot" data-thumb="https://framerusercontent.com/images/fHh3gObxCEFieC1yLgX8s7QGkk.png" style="transition-delay:.08s"><span class="project-num">03</span><span class="project-title">AI ChatBot Builder — The String</span><span class="project-meta"><span class="project-tags">Research / Design / Prototype</span><span class="project-arrow">↗</span></span></a></li>
+      <li><a class="project-item sr" href="case-study.html?id=proptech" data-thumb="https://framerusercontent.com/images/Vr5F6N4m3unewhYLN7ouONM766E.png" style="transition-delay:.12s"><span class="project-num">04</span><span class="project-title">0→1 in Proptech</span><span class="project-meta"><span class="project-tags">Sole Product Designer</span><span class="project-arrow">↗</span></span></a></li>
+      <li><a class="project-item sr" href="case-study.html?id=zido" data-thumb="https://framerusercontent.com/images/kisRzXQSlyLAwlTkhXwXfqMJpc.jpg" style="transition-delay:.16s"><span class="project-num">05</span><span class="project-title">Transforming Auctions — Zido</span><span class="project-meta"><span class="project-tags">Product / UX / UI Design</span><span class="project-arrow">↗</span></span></a></li>
+      <li><a class="project-item sr" href="case-study.html?id=elearning" data-thumb="https://framerusercontent.com/images/GnXwH9Usnrem6Fw44x0JA5lnxw.png" style="transition-delay:.2s"><span class="project-num">06</span><span class="project-title">E-learning Platform — Thryan</span><span class="project-meta"><span class="project-tags">Product Design</span><span class="project-arrow">↗</span></span></a></li>
+      <li><a class="project-item sr" href="case-study.html?id=visaty" data-thumb="https://framerusercontent.com/images/ffQDJbTUhy8dzAS3lUPZ7vCqfM.jpg" style="transition-delay:.24s"><span class="project-num">07</span><span class="project-title">Gamified Landing Page — Visaty</span><span class="project-meta"><span class="project-tags">UI / UX Design</span><span class="project-arrow">↗</span></span></a></li>
+      <li><a class="project-item sr" href="case-study.html?id=ramat" data-thumb="https://framerusercontent.com/images/Ys3hi6IeIuoHtSDrtP74v6oBn7Q.webp" style="transition-delay:.28s"><span class="project-num">08</span><span class="project-title">Gov. Consulting Services — RAMAT</span><span class="project-meta"><span class="project-tags">Web / UI / UX Design</span><span class="project-arrow">↗</span></span></a></li>
+    </ul>
+  </section>
+
+  <div class="marquee-section">
+    <div class="marquee-track">
+      <span class="marquee-item">Fintech ·</span><span class="marquee-item">Proptech ·</span><span class="marquee-item">Product Design ·</span><span class="marquee-item">Systems Thinking ·</span><span class="marquee-item">Dubai, UAE ·</span><span class="marquee-item">7 Years ·</span>
+      <span class="marquee-item">Fintech ·</span><span class="marquee-item">Proptech ·</span><span class="marquee-item">Product Design ·</span><span class="marquee-item">Systems Thinking ·</span><span class="marquee-item">Dubai, UAE ·</span><span class="marquee-item">7 Years ·</span>
+    </div>
+  </div>
+
+  <section id="info">
+    <p class="section-label sr">Info</p>
+    <div class="info-grid">
+      <div>
+        <h2 class="info-intro sr">Hello, I'm Shafi — 7 years building products that make <em>complex feel simple.</em></h2>
+        <div class="info-body sr">
+          <p>My path into design started with a BSc in Software Engineering. That background changes how I talk to engineers, reason about feasibility, and close the gap between intent and shipped product.</p>
+          <p>I've worked across fintech at Deriv, proptech at Silkhaus, and as a founding designer at Zido. Each built a different instinct: moving fast with founders, operating inside complex product teams, and knowing when to push craft and when to ship.</p>
+          <p>I'm based in Dubai and open to senior product design roles where the problems are hard and the team is serious.</p>
+        </div>
+        <div class="info-services sr">
+          <div class="service-item"><p class="service-label">(a)</p><p class="service-title">Product Design</p></div>
+          <div class="service-item"><p class="service-label">(b)</p><p class="service-title">UX Strategy & Research</p></div>
+          <div class="service-item"><p class="service-label">(c)</p><p class="service-title">Design Systems</p></div>
+          <div class="service-item"><p class="service-label">(d)</p><p class="service-title">Prototyping & Interaction Design</p></div>
+        </div>
+      </div>
+      <div>
+        <div class="sr">
+          <div class="career-item"><div><div class="career-role">Senior Product Designer</div><div class="career-company">Silkhaus</div></div><span class="career-year">2024 — Present</span></div>
+          <div class="career-item"><div><div class="career-role">Product Designer II</div><div class="career-company">Deriv.com</div></div><span class="career-year">2023 — 2024</span></div>
+          <div class="career-item"><div><div class="career-role">Founding Product Designer</div><div class="career-company">Zido.sa</div></div><span class="career-year">2021 — 2023</span></div>
+          <div class="career-item"><div><div class="career-role">Visual Designer</div><div class="career-company">Imput</div></div><span class="career-year">2019 — 2020</span></div>
+          <div class="career-item"><div><div class="career-role">Visual Designer</div><div class="career-company">Freelance</div></div><span class="career-year">2017 — 2019</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="writing">
+    <p class="section-label sr">Writing</p>
+    <ul class="writing-list">
+      <a class="writing-item sr" href="#"><span class="writing-title">On designing for trust in fintech</span><span class="writing-meta">Coming soon</span></a>
+      <a class="writing-item sr" href="#" style="transition-delay:.05s"><span class="writing-title">What a software degree taught me about design</span><span class="writing-meta">Coming soon</span></a>
+      <a class="writing-item sr" href="#" style="transition-delay:.1s"><span class="writing-title">The real cost of complexity in product UI</span><span class="writing-meta">Coming soon</span></a>
+    </ul>
+  </section>
+
+  <section id="contact">
+    <p class="section-label sr">Contact</p>
+    <h2 class="contact-headline sr">Let's work on<br>something <em>worth</em><br>building.</h2>
+    <div class="contact-links sr">
+      <a class="contact-link" href="mailto:hello@shafi.work">hello@shafi.work</a>
+      <a class="contact-link" href="https://www.linkedin.com/in/abdelshafi/" target="_blank">LinkedIn ↗</a>
+      <a class="contact-link" href="https://wa.me/971506659226" target="_blank">WhatsApp ↗</a>
+      <a class="contact-link" href="https://1drv.ms/b/c/dd950fc799df7dee/ETnHdxzQ0zJDkPLaGXkFfeMBf0kirnpOiiAbwxCFepYyuA?e=aL6dxW" target="_blank">Resume ↗</a>
+    </div>
+  </section>
+
+  <footer>
+    <span class="footer-copy">© Mohamed Abdelshafi 2025</span>
+    <a class="footer-back" href="#hero">Back to top ↑</a>
+    <span class="footer-copy">shafi.work</span>
+  </footer>
+
+</div>
+
+<script>
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => { cursor.style.left=e.clientX+'px'; cursor.style.top=e.clientY+'px'; });
+  document.querySelectorAll('a,button').forEach(el => {
+    el.addEventListener('mouseenter',()=>cursor.classList.add('grow'));
+    el.addEventListener('mouseleave',()=>cursor.classList.remove('grow'));
+  });
+
+  function sizeHeroText(){
+    const el = document.getElementById('heroText');
+    if(!el) return;
+    // Use canvas to measure text width independently of DOM visibility
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const testSize = 200;
+    // Wait for Google Sans to load, fall back to sans-serif
+    const fontFamily = "'Google Sans', sans-serif";
+    ctx.font = `500 ${testSize}px ${fontFamily}`;
+    const measured = ctx.measureText('@Shafi©').width;
+    if(measured === 0) {
+      // font not ready yet, retry
+      setTimeout(sizeHeroText, 50);
+      return;
+    }
+    const ratio = window.innerWidth / measured;
+    el.style.fontSize = (testSize * ratio * 0.998) + 'px';
+  }
+
+  // Size immediately on load, again after fonts, again after loader
+  sizeHeroText();
+  document.fonts.ready.then(sizeHeroText);
+  window.addEventListener('resize', sizeHeroText);
+
+  (function(){
+    const counter=document.getElementById('loader-counter');
+    const line=document.getElementById('loader-line');
+    const loader=document.getElementById('loader');
+    const site=document.getElementById('site');
+    const dur=2400, start=performance.now();
+    function ease(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+    function tick(now){
+      const raw=Math.min((now-start)/dur,1), e=ease(raw);
+      counter.textContent=String(Math.floor(e*100)).padStart(3,'0');
+      line.style.width=(e*100)+'%';
+      if(raw<1){requestAnimationFrame(tick);}
+      else{
+        counter.textContent='100'; line.style.width='100%';
+        setTimeout(()=>{
+          loader.classList.add('done');
+          site.classList.add('visible');
+          sizeHeroText();
+          // show hero text after sizing
+          const ht = document.getElementById('heroText');
+          if(ht) setTimeout(()=>ht.classList.add('visible'), 50);
+          document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+        },350);
+      }
+    }
+    requestAnimationFrame(tick);
+  })();
+
+  const observer=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}});
+  },{threshold:.08});
+  document.querySelectorAll('.sr').forEach(el=>observer.observe(el));
+
+  const thumb=document.getElementById('projectThumb');
+  document.querySelectorAll('.project-item[data-thumb]').forEach(item=>{
+    item.addEventListener('mouseenter',()=>{thumb.src=item.dataset.thumb;thumb.style.opacity='1';});
+    item.addEventListener('mousemove',e=>{thumb.style.left=(e.clientX+24)+'px';thumb.style.top=(e.clientY-92)+'px';});
+    item.addEventListener('mouseleave',()=>{thumb.style.opacity='0';});
+  });
+
+  // PAGE TRANSITIONS
+  const overlay = document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:var(--black);z-index:99998;opacity:0;pointer-events:none;transition:opacity 0.4s ease;';
+  document.body.appendChild(overlay);
+
+  // if arriving back from a case study, fade in from black
+  if(document.referrer.includes('case-study.html')){
+    overlay.style.opacity='1';
+    overlay.style.pointerEvents='all';
+    setTimeout(()=>{ overlay.style.opacity='0'; overlay.style.pointerEvents='none'; },80);
+  }
+
+  function navigateTo(href){
+    overlay.style.pointerEvents='all';
+    overlay.style.opacity='1';
+    setTimeout(()=>{ window.location.href=href; },420);
+  }
+
+  // intercept all internal non-anchor links
+  document.querySelectorAll('a[href]').forEach(a=>{
+    const href=a.getAttribute('href');
+    if(!href||href.startsWith('#')||href.startsWith('mailto:')||href.startsWith('http')||a.target==='_blank') return;
+    a.addEventListener('click',e=>{
+      e.preventDefault();
+      navigateTo(href);
+    });
+  });
+
+  // nav pill active highlighting on scroll
+  const sections=['work','info','writing','contact'];
+  const pillLinks=document.querySelectorAll('.nav-pill-link');
+  const ioNav=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        pillLinks.forEach(l=>l.classList.remove('active'));
+        const link=document.querySelector(`.nav-pill-link[href="#${entry.target.id}"]`);
+        if(link) link.classList.add('active');
+      }
+    });
+  },{threshold:0.4});
+  sections.forEach(id=>{const el=document.getElementById(id);if(el)ioNav.observe(el);});
+</script>
+</body>
+</html>
